@@ -1,195 +1,165 @@
 # Dagster Kubernetes Data Platform
 
-A modern **data pipeline orchestration platform** built with:
+A lightweight data engineering platform demonstrating **Dagster asset-based orchestration**, **containerized pipelines**, and **PostgreSQL warehouse persistence**.
 
-* **Dagster**
-* **Docker**
-* **PostgreSQL**
-* **Kubernetes** (planned)
-* **Terraform** (planned)
-
-This project demonstrates how to build a **production-ready data orchestration environment** using Dagster with containerized infrastructure.
+This project showcases modern data engineering concepts including asset lineage, ETL layering, and containerized orchestration.
 
 ---
 
 # Architecture
 
-The platform separates **orchestration**, **execution**, and **metadata storage**.
-
 ```
-Dagster Webserver (UI)
-│
-├── Dagster Daemon
-│   ├── Schedules
-│   ├── Sensors
-│   └── Run coordination
-│
-├── Postgres Metadata Database
-│   ├── Pipeline runs
-│   ├── Event logs
-│   └── Schedule state
-│
-└── User Code Repository
-    ├── Assets
-    ├── Jobs
-    └── Resources
+CSV Data Source
+      │
+      ▼
+Dagster Asset Pipeline
+      │
+      ▼
+Bronze Layer (Raw Structured Data)
+      │
+      ▼
+Silver Layer (Cleaned & Typed Data)
+      │
+      ▼
+Analytics Layer (Aggregated Metrics)
+      │
+      ▼
+PostgreSQL Data Warehouse
 ```
 
-Future production architecture:
+Platform components:
 
 ```
-Dagster UI
-   │
-   ▼
+Dagster Webserver
 Dagster Daemon
-   │
-   ▼
-Kubernetes Job Launcher
-   │
-   ▼
-Pipeline Containers
-   │
-   ▼
-Data Warehouse / Data Lake
+PostgreSQL Run/Event Storage
+PostgreSQL Warehouse Tables
+Docker Compose Development Environment
 ```
+
+---
+
+# Asset Pipeline
+
+The project implements a simple layered warehouse pipeline:
+
+| Layer     | Description                   |
+| --------- | ----------------------------- |
+| Raw       | Ingest CSV data               |
+| Bronze    | Minimal schema cleanup        |
+| Silver    | Data normalization and typing |
+| Analytics | Aggregated business metrics   |
+
+Asset lineage:
+
+```
+raw_sales_data
+      │
+      ▼
+bronze_sales
+      │
+      ▼
+silver_sales
+      │
+      ▼
+sales_summary
+```
+
+Dagster automatically manages dependency ordering and execution.
 
 ---
 
 # Repository Structure
 
 ```
-dagster-kubernetes-data-platform
-│
-├── docker-compose.yml
-├── Dockerfile
-├── requirements.txt
+dagster-k8s-data-platform
 │
 ├── pipelines/
-│   ├── __init__.py
 │   ├── assets.py
-│   ├── jobs.py
-│   └── resources.py
-│
-├── dagster_workspace/
-│   └── workspace.yaml
+│   ├── resources.py
+│   └── io_managers/
 │
 ├── dagster_home/
 │   └── dagster.yaml
 │
-├── k8s/
-│   └── (future Kubernetes manifests)
+├── dagster_workspace/
+│   └── workspace.yaml
 │
+├── data/
+│   └── sample_sales.csv
+│
+├── docker-compose.yml
 └── README.md
 ```
 
 ---
 
-# Features
-
-Current capabilities:
-
-* Dagster orchestration platform
-* Containerized development environment
-* PostgreSQL metadata storage
-* Dagster daemon for background services
-* Asset-based pipelines
-
-Planned enhancements:
-
-* Kubernetes job execution
-* Cloud storage integration (S3 / GCS)
-* Terraform infrastructure
-* Data warehouse integration
-* Observability and pipeline monitoring
-
----
-
 # Running the Platform
 
-Start the platform locally with Docker:
+Start the platform:
 
 ```
 docker compose up --build
 ```
 
-Dagster UI will be available at:
+Open Dagster UI:
 
 ```
 http://localhost:3000
 ```
 
----
-
-# Example Pipeline
-
-Current example pipeline:
-
-```
-raw_data → transformed_data
-```
-
-Example asset:
-
-```python
-from dagster import asset
-import pandas as pd
-
-@asset
-def raw_data():
-    data = {
-        "id": [1, 2, 3],
-        "value": [10, 20, 30]
-    }
-    return pd.DataFrame(data)
-
-@asset
-def transformed_data(raw_data):
-    raw_data["value_x2"] = raw_data["value"] * 2
-    return raw_data
-```
-
-Dagster assets allow:
-
-* **data lineage tracking**
-* **dependency management**
-* **observable pipelines**
+Materialize assets to run the pipeline.
 
 ---
 
-# Why Dagster
+# Verifying Data in Postgres
 
-Dagster provides modern orchestration features:
+Connect to the warehouse:
 
-* Asset-based pipeline modeling
-* Data lineage tracking
-* Observability
-* Scalable execution
-* Strong Python integration
+```
+docker compose exec postgres psql -U dagster
+```
 
-Compared to traditional orchestration tools like **Airflow**, Dagster focuses on **data asset management rather than task scheduling**.
+List tables:
+
+```
+\dt
+```
+
+Expected tables:
+
+```
+raw_sales_data
+bronze_sales
+silver_sales
+sales_summary
+```
 
 ---
 
-# Roadmap
+# Key Concepts Demonstrated
 
-Next platform improvements:
+* Dagster asset-based orchestration
+* Data lineage visualization
+* Layered warehouse modeling (bronze / silver / analytics)
+* Containerized development environment
+* PostgreSQL warehouse persistence
+* Modular pipeline architecture
 
-* Kubernetes run launcher
-* Distributed pipeline execution
+---
+
+# Future Enhancements
+
+Potential extensions:
+
+* Kubernetes job execution
+* S3 / object storage ingestion
 * Terraform infrastructure provisioning
-* Warehouse ingestion pipelines
-* ML workflow orchestration
+* dbt warehouse transformations
+* streaming ingestion pipelines
 
 ---
 
-# Author
+# Purpose
 
-**Jesse Brandon**
-
-Senior SQL Developer → Data Engineering
-
-This repository is part of a broader **data engineering portfolio platform** exploring:
-
-* modern data platform architecture
-* infrastructure automation
-* AI-assisted data workflows
+This repository is part of a personal **data engineering learning platform** used to explore modern orchestration and data platform patterns.
