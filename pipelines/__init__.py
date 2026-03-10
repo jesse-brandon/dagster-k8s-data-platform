@@ -1,6 +1,7 @@
 from dagster import Definitions
 
 from .assets import bronze_sales, raw_sales_data, sales_summary, silver_sales
+from .resources import postgres_io_manager
 
 defs = Definitions(
     assets=[
@@ -8,5 +9,6 @@ defs = Definitions(
         bronze_sales,
         silver_sales,
         sales_summary,
-    ]
+    ],
+    resources={"io_manager": postgres_io_manager},
 )

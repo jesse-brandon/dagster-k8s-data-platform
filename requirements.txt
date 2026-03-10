@@ -4,3 +4,5 @@ dagster-postgres
 dagster-k8s
 psycopg2-binary
 pandas
+sqlalchemy
+psycopg2-binary

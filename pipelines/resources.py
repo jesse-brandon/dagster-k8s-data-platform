@@ -1,18 +1,11 @@
-import psycopg2
-from dagster import resource
+from dagster import io_manager
+
+from .io_managers.postgres_io_manager import PostgresIOManager
 
 
-@resource
-def postgres_resource():
-    conn = psycopg2.connect(
-        host="postgres",
-        database="dagster",
-        user="dagster",
-        password="dagster",
-        port=5432,
-    )
+@io_manager
+def postgres_io_manager(_):
 
-    try:
-        yield conn
-    finally:
-        conn.close()
+    connection_string = "postgresql://dagster:dagster@postgres:5432/dagster"
+
+    return PostgresIOManager(connection_string)
