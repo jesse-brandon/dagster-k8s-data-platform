@@ -1,12 +1,34 @@
-
 services:
 
-  dagster:
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: dagster
+      POSTGRES_PASSWORD: dagster
+      POSTGRES_DB: dagster
+    ports:
+      - "5432:5432"
+
+  dagster-webserver:
     build: .
+    command: dagster-webserver -h 0.0.0.0 -p 3000 -w /app/dagster_workspace/workspace.yaml
     ports:
       - "3000:3000"
-    environment:
-      DAGSTER_HOME: /app/dagster_home
     volumes:
+      - ./dagster_home:/opt/dagster/dagster_home
       - .:/app
-      - ./dagster_home:/app/dagster_home
+    environment:
+      DAGSTER_HOME: /opt/dagster/dagster_home
+    depends_on:
+      - postgres
+
+  dagster-daemon:
+    build: .
+    command: dagster-daemon run -w /app/dagster_workspace/workspace.yaml
+    volumes:
+      - ./dagster_home:/opt/dagster/dagster_home
+      - .:/app
+    environment:
+      DAGSTER_HOME: /opt/dagster/dagster_home
+    depends_on:
+      - postgres
