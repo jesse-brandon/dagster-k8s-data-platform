@@ -2,9 +2,12 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyc
 
 # Dagster
-dagster_home/
+dagster_home/*
+!dagster_home/dagster.yaml
+
 .tmp_dagster_home*
 
 # Virtual environments
