@@ -1,0 +1,12 @@
+
+services:
+
+  dagster:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DAGSTER_HOME: /app/dagster_home
+    volumes:
+      - .:/app
+      - ./dagster_home:/app/dagster_home
